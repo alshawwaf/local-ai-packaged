@@ -1,4 +1,4 @@
-# Self-hosted AI starter kit (by the n8n team)
+# Self-hosted AI starter kit with Chcek Point MCP
 
 **Self-hosted AI Starter Kit** is an open, docker compose template that
 quickly bootstraps a fully featured Local AI and Low Code development
@@ -33,6 +33,10 @@ Engineering world, handles large amounts of data safely.
 ## Installation
 ### If running on Ubuntu
 * Install: git (sudo apt install git), docker and enable SSH (apt install openssh-server -y)
+
+## MCP Support
+* use the community node to integrate the Check Point MCP server
+* https://www.youtube.com/watch?v=kLgu-lQp5DY
 
 ### For Nvidia GPU users
 ```
