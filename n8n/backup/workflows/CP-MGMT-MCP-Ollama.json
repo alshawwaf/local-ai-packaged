@@ -1,0 +1,242 @@
+{
+  "name": "CP-MGMT-MCP-Ollama",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c302a14f-ae7a-46d8-9b6c-6311bec09926",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        320
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "nNfAshAXNQ81bjc7",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "granite4:latest",
+        "options": {}
+      },
+      "id": "360d2861-740f-4926-883c-a02205ee244f",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        640,
+        320
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "i8fXatxwj12xOABO",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## RAG AI Agent with Chat Interface",
+        "height": 527,
+        "width": 1257
+      },
+      "id": "c7ddde5d-46a6-4f76-a324-72d62adf7308",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        19.5,
+        -63
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "71ea1fc6-90cd-429d-81de-4abcaa36040b",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        192,
+        96
+      ],
+      "webhookId": "d9d625d6-d42c-42a1-abbc-965ba90a30cd"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a smart AI assistant. Always follow these rules:\n\n1. Start every run by calling \"List-CP-MGMT-MCP-Tools\". Do not execute yet.\n2. Show the available tool names.\n3. Use the best available tool name from step 1 in the tool MCP-Client.\n4. summarize the results you receive from check point after triggering the MCP-Client in the previous step."
+        }
+      },
+      "id": "89357fc4-0477-410b-b25f-53232e27562a",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        760,
+        96
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "75ebfdef-c8e2-4c3e-b716-1479d0cc2a73",
+              "name": "chatInput",
+              "value": "={{ $json?.chatInput || $json.body.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "59b7a20f-0626-4861-93e2-015d430c266e",
+              "name": "sessionId",
+              "value": "={{ $json?.sessionId || $json.body.sessionId}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5936805c-3cc4-4dd5-849c-80807037ae70",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "={{ $fromAI('Tool_Name') }}",
+        "toolParameters": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tool_Parameters', ``, 'json') }}"
+      },
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        896,
+        320
+      ],
+      "id": "f8b8314c-22c0-4c6b-bc63-2564ddbfb49e",
+      "name": "MCP-Client",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "ID4ZrTbXs3O9CvfQ",
+          "name": "CP-MCP-LOGS-SMS-ON-PREM"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        320
+      ],
+      "id": "0efb61ff-c7e3-44f6-a5b9-5cb88150da12",
+      "name": "List-CP-MGMT-MCP-Tools",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "ID4ZrTbXs3O9CvfQ",
+          "name": "CP-MCP-LOGS-SMS-ON-PREM"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP-Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List-CP-MGMT-MCP-Tools": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "85b7ade8-c5c7-43a3-a123-62b899cbf505",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "wOYnndBvL4iWZwaq",
+  "tags": []
+}
